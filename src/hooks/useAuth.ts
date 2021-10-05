@@ -3,10 +3,12 @@ import axios from "axios";
 import { User } from "../types/api/user";
 import { useHistory } from "react-router-dom";
 import { useMessage } from "./useMessage";
+import { useLoginUser } from "./useLoginUser";
 
 export const useAuth = () => {
   const history = useHistory();
   const { showMessage } = useMessage();
+  const { setLoginUser } = useLoginUser();
 
   const [loading, setLoading] = useState(false);
   const login = useCallback(
@@ -17,6 +19,8 @@ export const useAuth = () => {
         .then((res) => {
           if (res.data) {
             showMessage({ title: "ログインしました", status: "success" });
+            const isAdmin = res.data.id === 10;
+            setLoginUser({ ...res.data, isAdmin });
             history.push("/home");
           } else {
             showMessage({
@@ -31,10 +35,10 @@ export const useAuth = () => {
             title: "ログインできません",
             status: "error",
           });
-        })
-        .finally(() => setLoading(false));
+          setLoading(false);
+        });
     },
-    [history]
+    [history, setLoginUser, showMessage]
   );
   return { login, loading };
 };
